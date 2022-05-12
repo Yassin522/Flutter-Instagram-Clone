@@ -1,8 +1,11 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_instagram_clone/resources/auth_methods.dart';
+import 'package:flutter_instagram_clone/responsive/mobile_screen_layout.dart';
+import 'package:flutter_instagram_clone/responsive/responsive_layout_screen.dart';
+import 'package:flutter_instagram_clone/responsive/web_screen_layout.dart';
+import 'package:flutter_instagram_clone/screens/login_screen.dart';
 import 'package:flutter_instagram_clone/utils/colors.dart';
 import 'package:flutter_instagram_clone/utils/util.dart';
 import 'package:flutter_instagram_clone/widgets/text_field_input.dart';
@@ -22,6 +25,8 @@ final TextEditingController _passwordController=TextEditingController();
 final TextEditingController _bioController=TextEditingController();
 final TextEditingController _usernameController=TextEditingController();
 Uint8List? _image;
+bool _isLoading=false;
+
 
    @override
   void dispose() {
@@ -39,6 +44,48 @@ Uint8List? _image;
     });
   }
 
+  void signUpUser()async {
+    setState(() {
+      _isLoading=true;
+    });
+
+     print('eeeeeeeeeeeeeeeeeee');
+
+      String res= await AuthMethods().signUpUser(
+                        
+      email: _emailController.text,
+      password: _passwordController.text,
+      username: _usernameController.text,
+       bio: _bioController.text,
+       file: _image!,
+      );
+     
+      print(res);
+      print('oooooooooooooooo');
+
+    setState(() {
+      _isLoading=false;
+    });
+        
+        if(res!='success'){
+           showSnackBar(res, context);
+        }
+        else{
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context)=> const ResponsiveLayout(
+                      webScreenLayout: WebScreenLayout(),
+                       mobileScreenLayout: MobileScreenLayout(),
+                    )
+              )
+          );
+
+        }
+    }
+
+void navigatetoLogin(){
+     Navigator.of(context).push(MaterialPageRoute(builder: (context)=>LoginScreen()));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +104,7 @@ Uint8List? _image;
                       color:primaryColor,
                       height:64,
                    ),
-                   const SizedBox(height: 45),
+                   const SizedBox(height: 37),
 
                    Stack(
                      children: [
@@ -69,14 +116,14 @@ Uint8List? _image;
  
                        :const CircleAvatar(
                            radius: 64,
-                          backgroundImage: NetworkImage('https://www.bing.com/images/search?view=detailV2&ccid=VvvX4Ug%2f&id=6004B5D6FC0BF58B3E1CD6EA5BBB82D86933A747&thid=OIP.VvvX4Ug_y6j3qz2l5aJIMAAAAA&mediaurl=https%3a%2f%2ft4.ftcdn.net%2fjpg%2f00%2f64%2f67%2f63%2f240_F_64676383_LdbmhiNM6Ypzb3FM4PPuFP9rHe7ri8Ju.jpg&cdnurl=https%3a%2f%2fth.bing.com%2fth%2fid%2fR.56fbd7e1483fcba8f7ab3da5e5a24830%3frik%3dR6czadiCu1vq1g%26pid%3dImgRaw%26r%3d0&exph=240&expw=240&q=default+profile+picture&simid=607993599340857076&FORM=IRPRST&ck=536F607540E3259593D8A3B4CCFF8373&selectedIndex=12'),
+                          backgroundImage: NetworkImage('https://th.bing.com/th/id/OIP.VvvX4Ug_y6j3qz2l5aJIMAAAAA?w=151&h=169&c=7&r=0&o=5&pid=1.7'),
                           backgroundColor: Colors.white,
                         ),
                         Positioned(
                           bottom: -10,
                           left: 80,
                           child: IconButton(
-                             onPressed: (){},
+                             onPressed: selectImage,
                              icon: const Icon(Icons.add_a_photo),
                           ), 
                           
@@ -91,21 +138,21 @@ Uint8List? _image;
                      hintText: 'Enter your username', 
                      textInputType: TextInputType.text,
                     ),
-                   const SizedBox(height: 20),
+                   const SizedBox(height: 15),
 
                   TextFieldInput(
                     textEditingController: _emailController,
                      hintText: 'Enter your email', 
                      textInputType: TextInputType.emailAddress,
                     ),
-                   const SizedBox(height: 20),
+                   const SizedBox(height: 15),
                      TextFieldInput(
                     textEditingController: _passwordController,
                      hintText: 'Enter your password', 
                      textInputType: TextInputType.emailAddress,
                      isPass: true,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 15),
 
                    TextFieldInput(
                     textEditingController: _bioController,
@@ -114,23 +161,20 @@ Uint8List? _image;
                     ),
                    
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 15),
 
                     InkWell(
-                      onTap: () async {
-                        String res= await AuthMethods().signUpUser(
-                        
-                        email: _emailController.text,
-                         password: _passwordController.text,
-                          username: _usernameController.text,
-                           bio: _bioController.text,
-                           
-                           );
-                           print(res);
-                      },
+                      onTap: signUpUser, 
 
-                      child: Container(
-                         child: const Text('Sign up'),
+                      child:  Container(
+                         child: _isLoading? 
+                          const Center(
+                            child: CircularProgressIndicator(
+                              color: primaryColor,
+                            ),
+                            
+                          )
+                          :const Text('Sign up'),
                          width: double.infinity,
                          alignment: Alignment.center,
                          padding: const EdgeInsets.symmetric(vertical: 12),
@@ -148,18 +192,18 @@ Uint8List? _image;
                     const SizedBox(height: 12),
                     Flexible(child: Container(), flex: 2,),
                     
-                    Row(
+                   Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                            Container(
-                              child: const Text('Dont have an account?'),
+                              child: const Text('have an account?'),
                               padding: const EdgeInsets.symmetric(vertical: 8),
 
                            ),
                             GestureDetector(
-                              onTap: (){},
+                              onTap: navigatetoLogin,
                               child: Container(
-                                child: const Text('Sign up',
+                                child: const Text('Login',
                                  style: TextStyle(
                                    fontWeight: FontWeight.bold,
                                  ),
